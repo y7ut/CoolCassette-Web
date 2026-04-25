@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0a0a0a;
+  --color-surface: #111111;
+  --color-border: #2a2a2a;
+  --color-accent: #c8f542;
+  --color-dim: #444444;
+  --color-text: #e8e8e0;
+  --color-text-muted: #888888;
+  --font-mono: 'Space Mono', monospace;
+  --font-display: 'VT323', monospace;
+}
+
+html {
+  background: #0a0a0a;
+}
+
+body {
+  background: #0a0a0a;
+  color: #e8e8e0;
+  font-family: 'Space Mono', monospace;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Noise texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.6;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+
+/* Selection */
+::selection {
+  background: rgba(200, 245, 66, 0.25);
+  color: #e8e8e0;
+}
+
+/* Scanlines utility */
+.scanlines {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent, transparent 2px,
+    rgba(0,0,0,0.055) 2px, rgba(0,0,0,0.055) 4px
+  );
+  pointer-events: none;
+}
+
+/* Vignette utility */
+.vignette {
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.6) 100%);
+  pointer-events: none;
+}
+
+/* Accent glow utility */
+.accent-glow {
+  box-shadow: 0 0 10px rgba(200, 245, 66, 0.12);
+}
+
+/* Tape stage shadow */
+.tape-shadow {
+  box-shadow:
+    0 0 0 1px #1e1e1e,
+    0 30px 80px rgba(0,0,0,0.85),
+    0 0 140px rgba(200,245,66,0.03);
+}
+
+/* Progress bar */
+.progress-bar {
+  height: 2px;
+  background: #2a2a2a;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.progress-bar:hover {
+  background: #333;
+}
+.progress-fill {
+  height: 100%;
+  background: #c8f542;
+  transition: width 0.08s linear;
+}
+.progress-bar:hover .progress-fill {
+  box-shadow: 0 0 8px #c8f542;
+}
+
+/* Button base style matching demo */
+.btn-retro {
+  background: none;
+  border: 1px solid #2a2a2a;
+  color: #444;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s, box-shadow 0.12s;
+}
+.btn-retro:hover {
+  border-color: #c8f542;
+  color: #c8f542;
+  box-shadow: 0 0 10px rgba(200,245,66,0.12);
+}
+
+/* Status badge animations */
+@keyframes pulse-accent {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.animate-pulse-accent {
+  animation: pulse-accent 2s ease-in-out infinite;
+}
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+  background-size: 200% 100%;
+  animation: skeleton 1.5s ease-in-out infinite;
+}
+@keyframes skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Page transitions */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in {
+  animation: fadeIn 0.35s ease-out forwards;
+}
+
+/* Card hover lift */
+.card-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+}
