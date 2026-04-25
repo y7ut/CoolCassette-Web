@@ -4,6 +4,8 @@ export interface LibraryStatus {
   index_version: string
   index_hash: string
   album_count: number
+  music_dirs: string[]
+  wampy_dir: string
   scanning: boolean
   scan_id: string
   scan_started_at: string
@@ -131,6 +133,55 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 
 export async function getLibraryStatus(): Promise<LibraryStatus> {
   return apiFetch('/api/library/status')
+}
+
+export interface ReloadRequest {
+  music_dirs?: string[]
+  wampy_dir?: string
+}
+
+export interface ReloadResponse {
+  accepted: boolean
+  scan_id: string
+  index_version: string
+  index_hash: string
+  scanning: boolean
+}
+
+export async function postReload(body?: ReloadRequest): Promise<ReloadResponse> {
+  return apiFetch('/api/library/reload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  })
+}
+
+export interface ClearCacheResponse {
+  files_removed: number
+  bytes_freed: number
+  cache_dir: string
+}
+
+export async function postClearCache(): Promise<ClearCacheResponse> {
+  return apiFetch('/api/library/clear-cache', {
+    method: 'POST',
+  })
+}
+
+export interface FSEntry {
+  name: string
+  path: string
+  is_dir: boolean
+}
+
+export interface FSBrowseResponse {
+  path: string
+  parent: string
+  entries: FSEntry[]
+}
+
+export async function browseFS(dirPath: string): Promise<FSBrowseResponse> {
+  return apiFetch(`/api/fs/browse?path=${encodeURIComponent(dirPath)}`)
 }
 
 export async function getAlbums(params: {

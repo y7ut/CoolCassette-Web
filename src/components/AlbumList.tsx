@@ -1,7 +1,8 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAlbums } from '../hooks/useAlbums'
 import AlbumCard from './AlbumCard'
+import SettingsModal from './SettingsModal'
 import { saveListState } from './ScrollRestoration'
 
 type SortField = 'album' | 'artist' | 'created_at' | 'modified_at'
@@ -16,6 +17,7 @@ const SORT_OPTIONS: { label: string; value: SortField }[] = [
 
 export default function AlbumList() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const sortBy = (searchParams.get('sort_by') as SortField) || 'album'
   const order = (searchParams.get('order') as SortOrder) || 'asc'
 
@@ -95,7 +97,7 @@ export default function AlbumList() {
             Library Browser
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           {SORT_OPTIONS.map((opt) => {
             const active = sortBy === opt.value
             return (
@@ -111,6 +113,12 @@ export default function AlbumList() {
               </button>
             )
           })}
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="btn-retro text-[10px] px-3 py-1.5"
+          >
+            ⚙ SETTINGS
+          </button>
         </div>
       </div>
 
@@ -148,6 +156,14 @@ export default function AlbumList() {
           </div>
         </>
       )}
+      <SettingsModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        onReloaded={() => {
+          setSettingsOpen(false)
+          refetch()
+        }}
+      />
     </div>
   )
 }

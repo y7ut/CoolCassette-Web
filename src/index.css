@@ -161,3 +161,19 @@ body::before {
   transform: translateY(-4px);
   box-shadow: 0 12px 40px rgba(0,0,0,0.5);
 }
+
+/* Pixel progress bar */
+.pixel-progress {
+  display: flex;
+  gap: 2px;
+  height: 14px;
+}
+.pixel-progress-segment {
+  flex: 1;
+  background: #2a2a2a;
+  transition: background 0.15s;
+}
+.pixel-progress-segment.filled {
+  background: #c8f542;
+  box-shadow: 0 0 4px rgba(200, 245, 66, 0.3);
+}
