@@ -1,12 +1,6 @@
 import type {
-  AlbumDetail,
-  AlbumListResponse,
-  ClearCacheResponse,
   CoolCassetteAPI,
-  FSBrowseResponse,
-  LibraryStatus,
   ReloadRequest,
-  ReloadResponse,
 } from './types'
 
 declare global {
@@ -14,14 +8,14 @@ declare global {
     go: {
       main: {
         App: {
-          GetLibraryStatus(): Promise<LibraryStatus>
-          ReloadLibrary(req: string): Promise<ReloadResponse>
-          ClearCache(): Promise<ClearCacheResponse>
-          BrowseFS(dirPath: string): Promise<FSBrowseResponse>
-          ListAlbums(limit: number, sortBy: string, order: string, cursor: string): Promise<AlbumListResponse>
-          GetAlbum(id: string): Promise<AlbumDetail>
-          GeneratePreview(id: string, force: boolean): Promise<AlbumDetail>
-          PublishAlbum(id: string, force: boolean): Promise<AlbumDetail>
+          GetLibraryStatus(): Promise<any>
+          ReloadLibrary(req: { music_dirs?: string[]; wampy_dir?: string }): Promise<any>
+          ClearCache(): Promise<any>
+          BrowseFS(dirPath: string): Promise<any>
+          ListAlbums(limit: number, sortBy: string, order: string, cursor: string): Promise<any>
+          GetAlbum(id: string): Promise<any>
+          GeneratePreview(id: string, force: boolean): Promise<any>
+          PublishAlbum(id: string, force: boolean): Promise<any>
         }
       }
     }
@@ -58,7 +52,7 @@ const wailsClient: CoolCassetteAPI = {
   },
 
   async postReload(body?: ReloadRequest) {
-    const resp = await window.go.main.App.ReloadLibrary(JSON.stringify(body || {}))
+    const resp = await window.go.main.App.ReloadLibrary(body || {})
     if (resp.index_version) setIndexVersion(resp.index_version, resp.index_hash)
     return resp
   },
