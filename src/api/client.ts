@@ -1,222 +1,53 @@
-const API_BASE = '' // proxied via vite to http://127.0.0.1:7350
+import type { CoolCassetteAPI } from './types'
+import { httpClient } from './http-client'
+import wailsClient from './wails-client'
 
-export interface LibraryStatus {
-  index_version: string
-  index_hash: string
-  album_count: number
-  music_dirs: string[]
-  wampy_dir: string
-  scanning: boolean
-  scan_id: string
-  scan_started_at: string
-  scan_finished_at: string
-  scanned_albums: number
-  total_albums: number
-  scan_error?: string
-}
+export type {
+  AlbumDetail,
+  AlbumItem,
+  AlbumListResponse,
+  ClearCacheResponse,
+  CoolCassetteAPI,
+  FSBrowseResponse,
+  LibraryStatus,
+  MusicFile,
+  ReelAtlasFrame,
+  ReelConfig,
+  ReloadRequest,
+  ReloadResponse,
+  FSEntry,
+} from './types'
 
-export interface AlbumItem {
-  id: string
-  dir: string
-  name: string
-  slug: string
-  artist: string
-  album: string
-  track_count: number
-  status: 'built' | 'preview_ready' | 'not_built'
-  has_cover: boolean
-  cassette_ref_valid: boolean
-  cover_url: string
-  created_at: string
-  modified_at: string
-}
+const client: CoolCassetteAPI =
+  import.meta.env.VITE_TRANSPORT === 'wails' ? wailsClient : httpClient
 
-export interface AlbumListResponse {
-  items: AlbumItem[]
-  next_cursor: string | null
-  has_more: boolean
-  index_version: string
-  index_hash: string
-}
-
-export interface MusicFile {
-  name: string
-  path: string
-  title?: string
-  artist?: string
-  album?: string
-}
-
-export interface ReelConfig {
-  reelx: number
-  reely: number
-  artistx: number
-  artisty: number
-  titlex: number
-  titley: number
-  albumx: number
-  albumy: number
-  titlewidth: number
-}
-
-export type ReelAtlasFrame = { x: number; y: number; w: number; h: number }
-
-export interface AlbumDetail extends AlbumItem {
-  music_files: MusicFile[]
-  index_version: string
-  index_hash: string
-  published_tape_png_url?: string
-  published_reel_png_url?: string
-  tape_config?: ReelConfig
-  reel_config?: { delayMS: number }
-  reel_atlas_frames?: string[]
-}
-
-let currentIndexVersion = ''
-let currentIndexHash = ''
+export const getLibraryStatus = (...a: Parameters<CoolCassetteAPI['getLibraryStatus']>) =>
+  client.getLibraryStatus(...a)
+export const postReload = (...a: Parameters<CoolCassetteAPI['postReload']>) =>
+  client.postReload(...a)
+export const postClearCache = (...a: Parameters<CoolCassetteAPI['postClearCache']>) =>
+  client.postClearCache(...a)
+export const browseFS = (...a: Parameters<CoolCassetteAPI['browseFS']>) =>
+  client.browseFS(...a)
+export const getAlbums = (...a: Parameters<CoolCassetteAPI['getAlbums']>) =>
+  client.getAlbums(...a)
+export const getAlbumDetail = (...a: Parameters<CoolCassetteAPI['getAlbumDetail']>) =>
+  client.getAlbumDetail(...a)
+export const postPreview = (...a: Parameters<CoolCassetteAPI['postPreview']>) =>
+  client.postPreview(...a)
+export const postPublish = (...a: Parameters<CoolCassetteAPI['postPublish']>) =>
+  client.postPublish(...a)
+export const setIndexVersion = (...a: Parameters<CoolCassetteAPI['setIndexVersion']>) =>
+  client.setIndexVersion(...a)
+export const getIndexVersion = (...a: Parameters<CoolCassetteAPI['getIndexVersion']>) =>
+  client.getIndexVersion(...a)
+export const clearIndexVersion = (...a: Parameters<CoolCassetteAPI['clearIndexVersion']>) =>
+  client.clearIndexVersion(...a)
 
 export function getIndexHeaders(): Record<string, string> {
+  const { version, hash } = client.getIndexVersion()
   const h: Record<string, string> = {}
-  if (currentIndexVersion) h['X-CoolCassette-Index-Version'] = currentIndexVersion
-  if (currentIndexHash) h['X-CoolCassette-Index-Hash'] = currentIndexHash
+  if (version) h['X-CoolCassette-Index-Version'] = version
+  if (hash) h['X-CoolCassette-Index-Hash'] = hash
   return h
-}
-
-export function setIndexVersion(v: string, h: string) {
-  currentIndexVersion = v
-  currentIndexHash = h
-}
-
-export function getIndexVersion() {
-  return { version: currentIndexVersion, hash: currentIndexHash }
-}
-
-export function clearIndexVersion() {
-  currentIndexVersion = ''
-  currentIndexHash = ''
-}
-
-async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const url = `${API_BASE}${path}`
-  const res = await fetch(url, {
-    ...init,
-    headers: {
-      ...(init?.headers || {}),
-    },
-  })
-
-  if (res.status === 409) {
-    const body = await res.json()
-    // Update to new version/hash from response body for auto-retry
-    if (body.index_version && body.index_hash) {
-      setIndexVersion(body.index_version, body.index_hash)
-    } else {
-      clearIndexVersion()
-    }
-    const err = new Error(body.error || 'index content changed')
-    ;(err as any).code = 409
-    ;(err as any).body = body
-    throw err
-  }
-
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`HTTP ${res.status}: ${text}`)
-  }
-
-  const iv = res.headers.get('X-CoolCassette-Index-Version')
-  const ih = res.headers.get('X-CoolCassette-Index-Hash')
-  if (iv && ih) setIndexVersion(iv, ih)
-
-  return res.json()
-}
-
-export async function getLibraryStatus(): Promise<LibraryStatus> {
-  return apiFetch('/api/library/status')
-}
-
-export interface ReloadRequest {
-  music_dirs?: string[]
-  wampy_dir?: string
-}
-
-export interface ReloadResponse {
-  accepted: boolean
-  scan_id: string
-  index_version: string
-  index_hash: string
-  scanning: boolean
-}
-
-export async function postReload(body?: ReloadRequest): Promise<ReloadResponse> {
-  return apiFetch('/api/library/reload', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: body ? JSON.stringify(body) : undefined,
-  })
-}
-
-export interface ClearCacheResponse {
-  files_removed: number
-  bytes_freed: number
-  cache_dir: string
-}
-
-export async function postClearCache(): Promise<ClearCacheResponse> {
-  return apiFetch('/api/library/clear-cache', {
-    method: 'POST',
-  })
-}
-
-export interface FSEntry {
-  name: string
-  path: string
-  is_dir: boolean
-}
-
-export interface FSBrowseResponse {
-  path: string
-  parent: string
-  entries: FSEntry[]
-}
-
-export async function browseFS(dirPath: string): Promise<FSBrowseResponse> {
-  return apiFetch(`/api/fs/browse?path=${encodeURIComponent(dirPath)}`)
-}
-
-export async function getAlbums(params: {
-  limit?: number
-  sort_by?: string
-  order?: string
-  cursor?: string
-}): Promise<AlbumListResponse> {
-  const sp = new URLSearchParams()
-  if (params.limit) sp.set('limit', String(params.limit))
-  if (params.sort_by) sp.set('sort_by', params.sort_by)
-  if (params.order) sp.set('order', params.order)
-  if (params.cursor) sp.set('cursor', params.cursor)
-
-  return apiFetch(`/api/albums?${sp.toString()}`, {
-    headers: getIndexHeaders(),
-  })
-}
-
-export async function getAlbumDetail(id: string): Promise<AlbumDetail> {
-  return apiFetch(`/api/albums/${id}`)
-}
-
-export async function postPreview(id: string, force = false): Promise<AlbumDetail> {
-  return apiFetch(`/api/albums/${id}/preview`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ force }),
-  })
-}
-
-export async function postPublish(id: string, force = false): Promise<AlbumDetail> {
-  return apiFetch(`/api/albums/${id}/publish`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ force }),
-  })
 }
