@@ -1,6 +1,6 @@
 import type { CoolCassetteAPI } from './types'
-import { httpClient } from './http-client'
 import wailsClient from './wails-client'
+import { httpClient } from './http-client'
 
 export type {
   AlbumDetail,
@@ -18,34 +18,25 @@ export type {
   FSEntry,
 } from './types'
 
-const client: CoolCassetteAPI =
+const active: CoolCassetteAPI =
   import.meta.env.VITE_TRANSPORT === 'wails' ? wailsClient : httpClient
 
-export const getLibraryStatus = (...a: Parameters<CoolCassetteAPI['getLibraryStatus']>) =>
-  client.getLibraryStatus(...a)
-export const postReload = (...a: Parameters<CoolCassetteAPI['postReload']>) =>
-  client.postReload(...a)
-export const postClearCache = (...a: Parameters<CoolCassetteAPI['postClearCache']>) =>
-  client.postClearCache(...a)
-export const browseFS = (...a: Parameters<CoolCassetteAPI['browseFS']>) =>
-  client.browseFS(...a)
-export const getAlbums = (...a: Parameters<CoolCassetteAPI['getAlbums']>) =>
-  client.getAlbums(...a)
-export const getAlbumDetail = (...a: Parameters<CoolCassetteAPI['getAlbumDetail']>) =>
-  client.getAlbumDetail(...a)
-export const postPreview = (...a: Parameters<CoolCassetteAPI['postPreview']>) =>
-  client.postPreview(...a)
-export const postPublish = (...a: Parameters<CoolCassetteAPI['postPublish']>) =>
-  client.postPublish(...a)
-export const setIndexVersion = (...a: Parameters<CoolCassetteAPI['setIndexVersion']>) =>
-  client.setIndexVersion(...a)
-export const getIndexVersion = (...a: Parameters<CoolCassetteAPI['getIndexVersion']>) =>
-  client.getIndexVersion(...a)
-export const clearIndexVersion = (...a: Parameters<CoolCassetteAPI['clearIndexVersion']>) =>
-  client.clearIndexVersion(...a)
+export const getLibraryStatus = () => active.getLibraryStatus()
+export const postReload = (body?: Parameters<CoolCassetteAPI['postReload']>[0]) =>
+  active.postReload(body)
+export const postClearCache = () => active.postClearCache()
+export const browseFS = (dirPath: string) => active.browseFS(dirPath)
+export const getAlbums = (params: Parameters<CoolCassetteAPI['getAlbums']>[0]) =>
+  active.getAlbums(params)
+export const getAlbumDetail = (id: string) => active.getAlbumDetail(id)
+export const postPreview = (id: string, force?: boolean) => active.postPreview(id, force)
+export const postPublish = (id: string, force?: boolean) => active.postPublish(id, force)
+export const setIndexVersion = (v: string, h: string) => active.setIndexVersion(v, h)
+export const getIndexVersion = () => active.getIndexVersion()
+export const clearIndexVersion = () => active.clearIndexVersion()
 
 export function getIndexHeaders(): Record<string, string> {
-  const { version, hash } = client.getIndexVersion()
+  const { version, hash } = active.getIndexVersion()
   const h: Record<string, string> = {}
   if (version) h['X-CoolCassette-Index-Version'] = version
   if (hash) h['X-CoolCassette-Index-Hash'] = hash
