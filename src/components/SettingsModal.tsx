@@ -21,7 +21,7 @@ export default function SettingsModal({ open, onClose, onReloaded }: SettingsMod
   const [pickerTarget, setPickerTarget] = useState<{ type: 'music'; index: number } | { type: 'wampy' } | null>(null)
   const [cacheResult, setCacheResult] = useState<{ files: number; mb: string } | null>(null)
   const [clearing, setClearing] = useState(false)
-  const pollRef = useRef<ReturnType<typeof setInterval>>()
+  const pollRef = useRef<number>(0)
 
   const loadStatus = useCallback(async () => {
     try {

@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import ScrollRestoration from './components/ScrollRestoration'
+import ToastContainer from './components/ToastContainer'
 import ListPage from './pages/ListPage'
 import DetailPage from './pages/DetailPage'
 
@@ -7,6 +8,7 @@ function App() {
   return (
     <>
       <ScrollRestoration />
+      <ToastContainer />
       <Routes>
         <Route path="/" element={<ListPage />} />
         <Route path="/album/:id" element={<DetailPage />} />

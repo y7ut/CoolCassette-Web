@@ -3,7 +3,6 @@ import type { AlbumDetail } from '../api/client'
 import ReelCanvas from './ReelCanvas'
 import StatusBadge from './StatusBadge'
 import { usePlayerStore } from '../stores/playerStore'
-
 const FRAME_DELAY = 55
 
 interface TapeStageProps {
@@ -14,7 +13,7 @@ interface TapeStageProps {
 }
 
 export default function TapeStage({ album, onPreview, onPublish, isGenerating }: TapeStageProps) {
-  const [frameIdx, setFrameIdx] = useState(0)
+  const [, setFrameIdx] = useState(0)
   const [reelDelay, setReelDelay] = useState(FRAME_DELAY)
   const audioPlaying = usePlayerStore((s) => s.isPlaying)
   const currentAlbumId = usePlayerStore((s) => s.currentAlbumId)

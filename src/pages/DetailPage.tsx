@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useAlbumDetail } from '../hooks/useAlbumDetail'
 import { postPreview, postPublish } from '../api/client'
 import { usePlayerStore } from '../stores/playerStore'
+import { toast } from '../stores/toastStore'
 import TapeStage from '../components/TapeStage'
 import Playlist from '../components/Playlist'
 import PlayerControls from '../components/PlayerControls'
@@ -26,7 +27,7 @@ export default function DetailPage() {
       await postPreview(id, true)
       await refetch()
     } catch (e) {
-      alert('Preview generation failed: ' + (e as Error).message)
+      toast('Preview failed: ' + (e as Error).message, { type: 'error', position: 'center', borderSide: 'top' })
     } finally {
       setIsGenerating(false)
     }
@@ -39,7 +40,7 @@ export default function DetailPage() {
       await postPublish(id, false)
       await refetch()
     } catch (e) {
-      alert('Publish failed: ' + (e as Error).message)
+      toast('Publish failed: ' + (e as Error).message, { type: 'error', position: 'center', borderSide: 'top' })
     } finally {
       setIsGenerating(false)
     }

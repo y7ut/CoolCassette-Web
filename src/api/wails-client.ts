@@ -46,46 +46,81 @@ function trackIndex<T extends { index_version?: string; index_hash?: string }>(d
   return data
 }
 
+class WailsIPCError extends Error {
+  code?: number
+  constructor(message: string, code?: number) {
+    super(message)
+    this.code = code
+  }
+}
+
+function wrapError(err: unknown): never {
+  if (err instanceof Error) {
+    if (err.message === 'index content changed') {
+      clearIndexVersion()
+      throw new WailsIPCError(err.message, 409)
+    }
+    throw new WailsIPCError(err.message)
+  }
+  throw new WailsIPCError(String(err))
+}
+
 const wailsClient: CoolCassetteAPI = {
   async getLibraryStatus() {
-    return trackIndex(await window.go.main.App.GetLibraryStatus())
+    try {
+      return trackIndex(await window.go.main.App.GetLibraryStatus())
+    } catch (e) { throw wrapError(e) }
   },
 
   async postReload(body?: ReloadRequest) {
-    const resp = await window.go.main.App.ReloadLibrary(body || {})
-    if (resp.index_version) setIndexVersion(resp.index_version, resp.index_hash)
-    return resp
+    try {
+      const resp = await window.go.main.App.ReloadLibrary(body || {})
+      if (resp.index_version) setIndexVersion(resp.index_version, resp.index_hash)
+      return resp
+    } catch (e) { throw wrapError(e) }
   },
 
   async postClearCache() {
-    return window.go.main.App.ClearCache()
+    try {
+      return await window.go.main.App.ClearCache()
+    } catch (e) { throw wrapError(e) }
   },
 
   async browseFS(dirPath: string) {
-    return window.go.main.App.BrowseFS(dirPath)
+    try {
+      return await window.go.main.App.BrowseFS(dirPath)
+    } catch (e) { throw wrapError(e) }
   },
 
   async getAlbums(params) {
-    const resp = await window.go.main.App.ListAlbums(
-      params.limit || 0,
-      params.sort_by || '',
-      params.order || '',
-      params.cursor || '',
-    )
-    if (resp.index_version) setIndexVersion(resp.index_version, resp.index_hash)
-    return resp
+    try {
+      const resp = await window.go.main.App.ListAlbums(
+        params.limit || 0,
+        params.sort_by || '',
+        params.order || '',
+        params.cursor || '',
+      )
+      if (resp.index_version) setIndexVersion(resp.index_version, resp.index_hash)
+      return resp
+    } catch (e) { throw wrapError(e) }
   },
 
   async getAlbumDetail(id: string) {
-    return trackIndex(await window.go.main.App.GetAlbum(id))
+    try {
+      return trackIndex(await window.go.main.App.GetAlbum(id))
+    } catch (e) { throw wrapError(e) }
   },
 
   async postPreview(id: string, force = false) {
-    return trackIndex(await window.go.main.App.GeneratePreview(id, force))
+    try {
+      return trackIndex(await window.go.main.App.GeneratePreview(id, force))
+    } catch (e) { throw wrapError(e) }
   },
 
   async postPublish(id: string, force = false) {
-    return trackIndex(await window.go.main.App.PublishAlbum(id, force))
+    try {
+      return trackIndex(await window.go.main.App.PublishAlbum(id, force))
+    } catch (e) { throw wrapError(e) }
   },
 
   setIndexVersion,
