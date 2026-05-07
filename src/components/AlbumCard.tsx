@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Check, Radar, Hammer } from 'lucide-react'
+import { Check, Eye, Hammer } from 'lucide-react'
 import { useRef, useEffect } from 'react'
 import type { AlbumItem } from '../api/client'
 import { saveListState } from './ScrollRestoration'
@@ -10,7 +10,7 @@ interface AlbumCardProps {
 
 const STATUS_ICON = {
   built: { Icon: Check, className: 'text-accent' },
-  preview_ready: { Icon: Radar, className: 'text-orange-400' },
+  preview_ready: { Icon: Eye, className: 'text-orange-400' },
   not_built: { Icon: Hammer, className: 'text-dim' },
 }
 
@@ -24,7 +24,8 @@ function MarqueeText({ children, className }: { children: string; className: str
     if (!inner) return
     const overflow = inner.scrollWidth - el.clientWidth
     if (overflow > 1) {
-      el.style.setProperty('--marquee-duration', `${inner.scrollWidth / 120}s`)
+      el.style.setProperty('--marquee-offset', `-${overflow}px`)
+      el.style.setProperty('--marquee-duration', `${inner.scrollWidth / 60}s`)
       el.classList.add('marquee-overflow')
     }
   }, [children])

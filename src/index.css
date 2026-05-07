@@ -56,7 +56,6 @@
   background: #e81123;
   color: #fff;
 }
-
 .titlebar-mac {
   position: fixed;
   top: 0;
@@ -96,14 +95,14 @@ body.has-titlebar .fab-container {
   opacity: 1;
 }
 .fab-toggle:active {
-  opacity: 0.7;
+  opacity: 0.8;
 }
 .fab-panel {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 26px;
-  padding: 8px 16px;
+  gap: 6px;
+  padding: 6px 8px;
   height: 40px;
   background: rgba(10, 10, 10, 0.95);
   border: 1px solid #2a2a2a;
@@ -112,13 +111,6 @@ body.has-titlebar .fab-container {
   opacity: 0;
   transition: transform 0.2s ease, opacity 0.2s ease;
   pointer-events: none;
-}
-@media (min-width: 1400px) {
-  .fab-panel {
-    font-size: 28px;
-    gap: 34px;
-    padding: 12px 24px;
-  }
 }
 .fab-panel-open {
   transform: translateX(0);
@@ -146,19 +138,6 @@ body.has-titlebar .fab-container {
   from { transform: translateX(0); }
   to { transform: translateX(var(--marquee-offset, -50%)); }
 }
-.marquee-text {
-  display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.marquee-container:hover .marquee-text {
-  text-overflow: unset;
-  animation: marquee-scroll 4s linear infinite;
-}
-@keyframes marquee-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
 
 html {
   background: #0a0a0a;
@@ -172,7 +151,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
 body.has-titlebar {
   padding-top: 38px;
 }

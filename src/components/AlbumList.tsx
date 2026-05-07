@@ -79,7 +79,6 @@ export default function AlbumList() {
 
   return (
     <div className="fade-in">
-      {/* Header */}
       <div className="mb-8 pt-3">
         <h1 className="font-display text-4xl text-accent tracking-wider">COOLCASSETTE</h1>
         <p className="text-[10px] text-dim tracking-[0.2em] uppercase mt-1">
@@ -87,7 +86,6 @@ export default function AlbumList() {
         </p>
       </div>
 
-      {/* Album grid */}
       {showLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {Array.from({ length: 10 }).map((_, i) => (
