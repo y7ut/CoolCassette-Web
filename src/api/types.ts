@@ -111,6 +111,7 @@ export interface CoolCassetteAPI {
     sort_by?: string
     order?: string
     cursor?: string
+    q?: string
   }): Promise<AlbumListResponse>
   getAlbumDetail(id: string): Promise<AlbumDetail>
   postPreview(id: string, force?: boolean): Promise<AlbumDetail>

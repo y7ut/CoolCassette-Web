@@ -12,7 +12,7 @@ declare global {
           ReloadLibrary(req: { music_dirs?: string[]; wampy_dir?: string }): Promise<any>
           ClearCache(): Promise<any>
           BrowseFS(dirPath: string): Promise<any>
-          ListAlbums(limit: number, sortBy: string, order: string, cursor: string): Promise<any>
+          ListAlbums(limit: number, sortBy: string, order: string, cursor: string, search: string): Promise<any>
           GetAlbum(id: string): Promise<any>
           GeneratePreview(id: string, force: boolean): Promise<any>
           PublishAlbum(id: string, force: boolean): Promise<any>
@@ -99,6 +99,7 @@ const wailsClient: CoolCassetteAPI = {
         params.sort_by || '',
         params.order || '',
         params.cursor || '',
+        params.q || '',
       )
       if (resp.index_version) setIndexVersion(resp.index_version, resp.index_hash)
       return resp

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { Check, Eye, Hammer } from 'lucide-react'
+import { Check, Radar, Hammer } from 'lucide-react'
+import { useRef, useEffect } from 'react'
 import type { AlbumItem } from '../api/client'
 import { saveListState } from './ScrollRestoration'
 
@@ -9,8 +10,32 @@ interface AlbumCardProps {
 
 const STATUS_ICON = {
   built: { Icon: Check, className: 'text-accent' },
-  preview_ready: { Icon: Eye, className: 'text-orange-400' },
+  preview_ready: { Icon: Radar, className: 'text-orange-400' },
   not_built: { Icon: Hammer, className: 'text-dim' },
+}
+
+function MarqueeText({ children, className }: { children: string; className: string }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const inner = el.firstElementChild as HTMLElement
+    if (!inner) return
+    const overflow = inner.scrollWidth - el.clientWidth
+    if (overflow > 1) {
+      el.style.setProperty('--marquee-duration', `${inner.scrollWidth / 120}s`)
+      el.classList.add('marquee-overflow')
+    }
+  }, [children])
+
+  return (
+    <div className="marquee-container" ref={containerRef}>
+      <div className={`${className} marquee-inner`}>
+        {children}
+      </div>
+    </div>
+  )
 }
 
 export default function AlbumCard({ album }: AlbumCardProps) {
@@ -38,8 +63,10 @@ export default function AlbumCard({ album }: AlbumCardProps) {
       </div>
       <div className="p-3 flex items-end justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="text-sm font-bold text-text truncate">{album.album}</h3>
-          <p className="text-xs text-dim mt-1 truncate">{album.artist}</p>
+          <MarqueeText className="text-sm font-bold text-text">{album.album}</MarqueeText>
+          <div className="mt-1">
+            <MarqueeText className="text-xs text-dim">{album.artist}</MarqueeText>
+          </div>
           <p className="text-[10px] text-text-muted mt-2">
             {album.track_count} TRACK{album.track_count !== 1 ? 'S' : ''}
           </p>

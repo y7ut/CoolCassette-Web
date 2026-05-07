@@ -106,7 +106,7 @@ export default function PlayerBar() {
           </div>
         </div>
       </div>
-      <audio ref={audioRef} crossOrigin="anonymous" />
+      <audio ref={audioRef} />
     </div>
   )
 }

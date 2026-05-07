@@ -74,5 +74,5 @@ export default function AudioEngine({ tracks, albumId }: AudioEngineProps) {
     return () => window.removeEventListener('keydown', onKey)
   }, [tracks, albumId, playOrToggle])
 
-  return <audio ref={audioRef} crossOrigin="anonymous" />
+  return <audio ref={audioRef} />
 }

@@ -1,25 +1,18 @@
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAlbums } from '../hooks/useAlbums'
 import AlbumCard from './AlbumCard'
-import SettingsModal from './SettingsModal'
 import { saveListState } from './ScrollRestoration'
 
 type SortField = 'album' | 'artist' | 'created_at' | 'modified_at'
 type SortOrder = 'asc' | 'desc'
 
-const SORT_OPTIONS: { label: string; value: SortField }[] = [
-  { label: 'Album', value: 'album' },
-  { label: 'Artist', value: 'artist' },
-  { label: 'Created', value: 'created_at' },
-  { label: 'Modified', value: 'modified_at' },
-]
-
 export default function AlbumList() {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [searchParams] = useSearchParams()
+
   const sortBy = (searchParams.get('sort_by') as SortField) || 'album'
   const order = (searchParams.get('order') as SortOrder) || 'asc'
+  const search = searchParams.get('q') || ''
 
   const {
     data,
@@ -30,14 +23,11 @@ export default function AlbumList() {
     isFetching,
     error,
     refetch,
-  } = useAlbums(sortBy, order)
+  } = useAlbums(sortBy, order, search)
 
-  // Auto-retry on 409: new index version/hash already set by apiFetch
   const is409 = error && (error as any).code === 409
   useEffect(() => {
-    if (is409) {
-      refetch()
-    }
+    if (is409) refetch()
   }, [is409, refetch])
 
   const observerRef = useRef<IntersectionObserver | null>(null)
@@ -60,22 +50,22 @@ export default function AlbumList() {
     return () => observerRef.current?.disconnect()
   }, [handleObserver])
 
-  // Save scroll position on scroll
   useEffect(() => {
+    let ticking = false
     const onScroll = () => {
-      saveListState(sortBy, order)
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          saveListState(sortBy, order)
+          ticking = false
+        })
+        ticking = true
+      }
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [sortBy, order])
 
-  const setSort = (field: SortField) => {
-    const newOrder: SortOrder = sortBy === field && order === 'asc' ? 'desc' : 'asc'
-    setSearchParams({ sort_by: field, order: newOrder })
-  }
-
   const albums = data?.pages.flatMap((p) => p.items) || []
-
   const showLoading = isLoading || (isFetching && !isFetchingNextPage && albums.length === 0)
 
   if (error && !is409) {
@@ -90,36 +80,11 @@ export default function AlbumList() {
   return (
     <div className="fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="font-display text-4xl text-accent tracking-wider">COOLCASSETTE</h1>
-          <p className="text-[10px] text-dim tracking-[0.2em] uppercase mt-1">
-            Library Browser
-          </p>
-        </div>
-        <div className="flex gap-2 items-center">
-          {SORT_OPTIONS.map((opt) => {
-            const active = sortBy === opt.value
-            return (
-              <button
-                key={opt.value}
-                onClick={() => setSort(opt.value)}
-                className={`btn-retro text-[10px] px-3 py-1.5 ${
-                  active ? 'border-accent text-accent' : ''
-                }`}
-              >
-                {opt.label}
-                {active && (order === 'asc' ? ' ↑' : ' ↓')}
-              </button>
-            )
-          })}
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="btn-retro text-[10px] px-3 py-1.5"
-          >
-            ⚙ SETTINGS
-          </button>
-        </div>
+      <div className="mb-8 pt-3">
+        <h1 className="font-display text-4xl text-accent tracking-wider">COOLCASSETTE</h1>
+        <p className="text-[10px] text-dim tracking-[0.2em] uppercase mt-1">
+          Library Browser
+        </p>
       </div>
 
       {/* Album grid */}
@@ -142,8 +107,6 @@ export default function AlbumList() {
               <AlbumCard key={album.id} album={album} />
             ))}
           </div>
-
-          {/* Load more sentinel */}
           <div ref={loadMoreRef} className="h-8 mt-8 flex items-center justify-center">
             {isFetchingNextPage && (
               <span className="text-dim text-xs tracking-widest animate-pulse-accent">
@@ -156,14 +119,6 @@ export default function AlbumList() {
           </div>
         </>
       )}
-      <SettingsModal
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        onReloaded={() => {
-          setSettingsOpen(false)
-          refetch()
-        }}
-      />
     </div>
   )
 }

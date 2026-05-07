@@ -16,9 +16,9 @@ export function useLibraryStatus() {
   })
 }
 
-export function useAlbums(sortBy: string, order: string) {
+export function useAlbums(sortBy: string, order: string, search: string) {
   return useInfiniteQuery({
-    queryKey: ['albums', sortBy, order],
+    queryKey: ['albums', sortBy, order, search],
     queryFn: async ({ pageParam }) => {
       try {
         const data = await getAlbums({
@@ -26,6 +26,7 @@ export function useAlbums(sortBy: string, order: string) {
           sort_by: sortBy,
           order: order,
           cursor: pageParam || undefined,
+          q: search || undefined,
         })
         return data
       } catch (err: any) {

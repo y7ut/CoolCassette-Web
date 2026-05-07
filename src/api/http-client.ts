@@ -97,12 +97,14 @@ export const httpClient: CoolCassetteAPI = {
     sort_by?: string
     order?: string
     cursor?: string
+    q?: string
   }): Promise<AlbumListResponse> {
     const sp = new URLSearchParams()
     if (params.limit) sp.set('limit', String(params.limit))
     if (params.sort_by) sp.set('sort_by', params.sort_by)
     if (params.order) sp.set('order', params.order)
     if (params.cursor) sp.set('cursor', params.cursor)
+    if (params.q) sp.set('q', params.q)
     return apiFetch(`/api/albums?${sp.toString()}`, {
       headers: getIndexHeaders(),
     })
