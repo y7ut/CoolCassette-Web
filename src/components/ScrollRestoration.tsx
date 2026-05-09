@@ -47,6 +47,7 @@ export default function ScrollRestoration() {
 
     if (location.pathname.startsWith('/album/')) {
       restoredRef.current = false
+      window.scrollTo({ top: 0, behavior: 'instant' })
     }
   }, [location.pathname, navType])
 

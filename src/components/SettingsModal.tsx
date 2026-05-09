@@ -184,7 +184,7 @@ export default function SettingsModal({ open, onClose, onReloaded }: SettingsMod
               <span>SCANNING...</span>
               <span className="text-text">
                 {progress}%{' '}
-                {status ? `(${status.scanned_albums}/${status.total_albums})` : ''}
+                {status ? `(${status.scanned_albums ?? 0}/${status.total_albums ?? 0})` : ''}
               </span>
             </div>
             <div className="pixel-progress">

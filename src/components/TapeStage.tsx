@@ -71,7 +71,7 @@ export default function TapeStage({ album, onPreview, onPublish, isGenerating }:
           </div>
         )}
 
-        {status === 'built' && (
+        {(status === 'built' || status === 'preview_ready') && (
           <ReelCanvas
             atlasUrl={reelUrl}
             reelConfig={reelConfig}
@@ -106,6 +106,9 @@ export default function TapeStage({ album, onPreview, onPublish, isGenerating }:
       {status === 'preview_ready' && (
         <div className="flex gap-4 items-center text-[11px] text-dim tracking-wider font-mono">
           <span>PREVIEW READY</span>
+          <button onClick={onPreview} disabled={isGenerating} className="btn-retro">
+            {isGenerating ? 'GENERATING...' : 'REGENERATE'}
+          </button>
           <button onClick={onPublish} disabled={isGenerating} className="btn-retro">
             {isGenerating ? 'PUBLISHING...' : 'PUBLISH TO WAMPY'}
           </button>
