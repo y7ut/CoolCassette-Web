@@ -39,7 +39,7 @@ export default function AlbumList() {
         fetchNextPage()
       }
     },
-    [fetchNextPage, hasNextPage, isFetchingNextPage]
+    [fetchNextPage, hasNextPage, isFetchingNextPage],
   )
 
   useEffect(() => {

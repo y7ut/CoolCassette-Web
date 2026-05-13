@@ -1,7 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { useQueryClient, type InfiniteData } from '@tanstack/react-query'
 import { useAlbumDetail } from '../hooks/useAlbumDetail'
-import { postPreview, postPublish } from '../api/client'
+import { postPreview, postPublish, clearIndexVersion } from '../api/client'
+import type { AlbumListResponse, AlbumItem } from '../api/types'
 import { usePlayerStore } from '../stores/playerStore'
 import { toast } from '../stores/toastStore'
 import TapeStage from '../components/TapeStage'
@@ -12,6 +14,7 @@ import AudioEngine from '../components/AudioEngine'
 export default function DetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { data: album, isLoading, refetch } = useAlbumDetail(id || '')
   const [isGenerating, setIsGenerating] = useState(false)
   const reset = usePlayerStore((s) => s.reset)
@@ -20,11 +23,31 @@ export default function DetailPage() {
     return () => reset()
   }, [reset])
 
+  const syncAlbumStatusToList = (albumId: string, newStatus: AlbumItem['status']) => {
+    clearIndexVersion()
+    queryClient.setQueriesData<InfiniteData<AlbumListResponse>>(
+      { queryKey: ['albums'] },
+      (old) => {
+        if (!old) return old
+        return {
+          ...old,
+          pages: old.pages.map((page) => ({
+            ...page,
+            items: page.items.map((item) =>
+              item.id === albumId ? { ...item, status: newStatus } : item
+            ),
+          })),
+        }
+      },
+    )
+  }
+
   const handlePreview = async () => {
     if (!id) return
     setIsGenerating(true)
     try {
-      await postPreview(id, true)
+      const result = await postPreview(id, true)
+      syncAlbumStatusToList(id, result.status)
       await refetch()
     } catch (e) {
       toast('Preview failed: ' + (e as Error).message, { type: 'error', position: 'center', borderSide: 'top' })
@@ -37,7 +60,8 @@ export default function DetailPage() {
     if (!id) return
     setIsGenerating(true)
     try {
-      await postPublish(id, false)
+      const result = await postPublish(id, false)
+      syncAlbumStatusToList(id, result.status)
       await refetch()
     } catch (e) {
       toast('Publish failed: ' + (e as Error).message, { type: 'error', position: 'center', borderSide: 'top' })

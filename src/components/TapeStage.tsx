@@ -91,13 +91,13 @@ export default function TapeStage({ album, onPreview, onPublish, isGenerating }:
               <p className="text-dim text-xs mt-3 tracking-wider">
                 GENERATE TAPE PREVIEW TO BEGIN
               </p>
-              <button
-                onClick={onPreview}
-                disabled={isGenerating}
-                className="btn-retro mt-4 text-sm"
-              >
-                {isGenerating ? 'GENERATING...' : 'GENERATE PREVIEW'}
-              </button>
+                <button
+                  onClick={onPreview}
+                  disabled={isGenerating}
+                  className={`btn-retro mt-4 text-sm${isGenerating ? ' animate-glow-accent' : ''}`}
+                >
+                  {isGenerating ? 'GENERATING...' : 'GENERATE PREVIEW'}
+                </button>
             </div>
           </div>
         )}
@@ -106,10 +106,10 @@ export default function TapeStage({ album, onPreview, onPublish, isGenerating }:
       {status === 'preview_ready' && (
         <div className="flex gap-4 items-center text-[11px] text-dim tracking-wider font-mono">
           <span>PREVIEW READY</span>
-          <button onClick={onPreview} disabled={isGenerating} className="btn-retro">
+          <button onClick={onPreview} disabled={isGenerating} className={`btn-retro${isGenerating ? ' animate-glow-accent' : ''}`}>
             {isGenerating ? 'GENERATING...' : 'REGENERATE'}
           </button>
-          <button onClick={onPublish} disabled={isGenerating} className="btn-retro">
+          <button onClick={onPublish} disabled={isGenerating} className={`btn-retro${isGenerating ? ' animate-glow-accent' : ''}`}>
             {isGenerating ? 'PUBLISHING...' : 'PUBLISH TO WAMPY'}
           </button>
         </div>

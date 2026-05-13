@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import { useLocation, useNavigationType } from 'react-router-dom'
 
 const SCROLL_KEY = 'cc_list_scroll'
@@ -30,7 +30,7 @@ export default function ScrollRestoration() {
   const navType = useNavigationType()
   const restoredRef = useRef(false)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (location.pathname === '/' && navType === 'POP') {
       // Returning to list page via back button
       const state = getListState()

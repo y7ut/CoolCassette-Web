@@ -254,6 +254,23 @@ body::before {
   box-shadow: 0 0 10px rgba(200,245,66,0.12);
 }
 
+/* Button glow animation */
+@keyframes glow-accent {
+  0%, 100% {
+    border-color: #c8f542;
+    color: #c8f542;
+    box-shadow: 0 0 8px rgba(200,245,66,0.3);
+  }
+  50% {
+    border-color: #2a2a2a;
+    color: #444;
+    box-shadow: none;
+  }
+}
+.animate-glow-accent {
+  animation: glow-accent 1.6s ease-in-out infinite;
+}
+
 /* Status badge animations */
 @keyframes pulse-accent {
   0%, 100% { opacity: 1; }

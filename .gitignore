@@ -11,7 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
-./wailsjs
+wailsjs
 package.json.md5
 
 # Editor directories and files
