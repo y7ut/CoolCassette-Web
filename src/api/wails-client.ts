@@ -16,6 +16,12 @@ declare global {
           GetAlbum(id: string): Promise<any>
           GeneratePreview(id: string, force: boolean): Promise<any>
           PublishAlbum(id: string, force: boolean): Promise<any>
+          GeneratePreviewAsync(id: string, force: boolean): Promise<any>
+          PublishAlbumAsync(id: string, force: boolean): Promise<any>
+          GeneratePreviewBatchAsync(ids: string[], force: boolean): Promise<any>
+          PublishAlbumBatchAsync(ids: string[], force: boolean): Promise<any>
+          GetBuildJob(jobID: string): Promise<any>
+          GetBuildQueue(status: string): Promise<any>
         }
       }
     }
@@ -121,6 +127,42 @@ const wailsClient: CoolCassetteAPI = {
   async postPublish(id: string, force = false) {
     try {
       return trackIndex(await window.go.main.App.PublishAlbum(id, force))
+    } catch (e) { throw wrapError(e) }
+  },
+
+  async postPreviewAsync(id: string, force = false) {
+    try {
+      return await window.go.main.App.GeneratePreviewAsync(id, force)
+    } catch (e) { throw wrapError(e) }
+  },
+
+  async postPublishAsync(id: string, force = false) {
+    try {
+      return await window.go.main.App.PublishAlbumAsync(id, force)
+    } catch (e) { throw wrapError(e) }
+  },
+
+  async postPreviewBatchAsync(ids: string[], force = false) {
+    try {
+      return await window.go.main.App.GeneratePreviewBatchAsync(ids, force)
+    } catch (e) { throw wrapError(e) }
+  },
+
+  async postPublishBatchAsync(ids: string[], force = false) {
+    try {
+      return await window.go.main.App.PublishAlbumBatchAsync(ids, force)
+    } catch (e) { throw wrapError(e) }
+  },
+
+  async getBuildJob(jobID: string) {
+    try {
+      return await window.go.main.App.GetBuildJob(jobID)
+    } catch (e) { throw wrapError(e) }
+  },
+
+  async getBuildQueue(status = 'all') {
+    try {
+      return await window.go.main.App.GetBuildQueue(status)
     } catch (e) { throw wrapError(e) }
   },
 

@@ -35,8 +35,8 @@ const FRAME_COUNT = 40
 const DEFAULT_DELAY = 55
 
 const CIRCLES = [
-  { cx: 57, cy: 56, r: 42 },
-  { cx: 383, cy: 56, r: 42 },
+  { cx: 53, cy: 59, r: 44 },
+  { cx: 385, cy: 59, r: 44 },
 ]
 
 const DEFAULT_FRAMES = Array.from({ length: FRAME_COUNT }, (_, i) => ({

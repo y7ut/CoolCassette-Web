@@ -7,6 +7,13 @@ export type {
   AlbumItem,
   AlbumListResponse,
   ClearCacheResponse,
+  BuildBatchEnqueueResponse,
+  BuildEnqueueResponse,
+  BuildJob,
+  BuildJobStatus,
+  BuildQueueResponse,
+  BuildQueueStatusFilter,
+  BuildTaskType,
   CoolCassetteAPI,
   FSBrowseResponse,
   LibraryStatus,
@@ -31,6 +38,12 @@ export const getAlbums = (params: Parameters<CoolCassetteAPI['getAlbums']>[0]) =
 export const getAlbumDetail = (id: string) => active.getAlbumDetail(id)
 export const postPreview = (id: string, force?: boolean) => active.postPreview(id, force)
 export const postPublish = (id: string, force?: boolean) => active.postPublish(id, force)
+export const postPreviewAsync = (id: string, force?: boolean) => active.postPreviewAsync(id, force)
+export const postPublishAsync = (id: string, force?: boolean) => active.postPublishAsync(id, force)
+export const postPreviewBatchAsync = (ids: string[], force?: boolean) => active.postPreviewBatchAsync(ids, force)
+export const postPublishBatchAsync = (ids: string[], force?: boolean) => active.postPublishBatchAsync(ids, force)
+export const getBuildJob = (jobID: string) => active.getBuildJob(jobID)
+export const getBuildQueue = (status?: Parameters<CoolCassetteAPI['getBuildQueue']>[0]) => active.getBuildQueue(status)
 export const setIndexVersion = (v: string, h: string) => active.setIndexVersion(v, h)
 export const getIndexVersion = () => active.getIndexVersion()
 export const clearIndexVersion = () => active.clearIndexVersion()

@@ -89,6 +89,43 @@ export interface ClearCacheResponse {
   cache_dir: string
 }
 
+export type BuildTaskType = 'preview' | 'publish'
+export type BuildJobStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'canceled'
+export type BuildQueueStatusFilter = 'all' | 'waiting' | 'done'
+
+export interface BuildJob {
+  id: string
+  type: BuildTaskType
+  album_id: string
+  album_name?: string
+  force: boolean
+  status: BuildJobStatus
+  queue_position?: number
+  created_at: string
+  started_at?: string
+  finished_at?: string
+  result?: AlbumDetail
+  error?: string
+}
+
+export interface BuildEnqueueResponse {
+  accepted: boolean
+  job: BuildJob
+}
+
+export interface BuildBatchEnqueueResponse {
+  accepted: boolean
+  jobs: BuildJob[]
+}
+
+export interface BuildQueueResponse {
+  max_running: number
+  max_waiting: number
+  running: number
+  waiting: number
+  jobs: BuildJob[]
+}
+
 export interface FSEntry {
   name: string
   path: string
@@ -116,6 +153,12 @@ export interface CoolCassetteAPI {
   getAlbumDetail(id: string): Promise<AlbumDetail>
   postPreview(id: string, force?: boolean): Promise<AlbumDetail>
   postPublish(id: string, force?: boolean): Promise<AlbumDetail>
+  postPreviewAsync(id: string, force?: boolean): Promise<BuildEnqueueResponse>
+  postPublishAsync(id: string, force?: boolean): Promise<BuildEnqueueResponse>
+  postPreviewBatchAsync(ids: string[], force?: boolean): Promise<BuildBatchEnqueueResponse>
+  postPublishBatchAsync(ids: string[], force?: boolean): Promise<BuildBatchEnqueueResponse>
+  getBuildJob(jobID: string): Promise<BuildJob>
+  getBuildQueue(status?: BuildQueueStatusFilter): Promise<BuildQueueResponse>
   setIndexVersion(v: string, h: string): void
   getIndexVersion(): { version: string; hash: string }
   clearIndexVersion(): void

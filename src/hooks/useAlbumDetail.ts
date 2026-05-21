@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { getAlbumDetail, postPreview, postPublish } from '../api/client'
+import { getAlbumDetail } from '../api/client'
 
 export function useAlbumDetail(id: string) {
   return useQuery({
@@ -7,16 +7,4 @@ export function useAlbumDetail(id: string) {
     queryFn: () => getAlbumDetail(id),
     enabled: !!id,
   })
-}
-
-export function usePreviewMutation() {
-  return {
-    mutateAsync: postPreview,
-  }
-}
-
-export function usePublishMutation() {
-  return {
-    mutateAsync: postPublish,
-  }
 }

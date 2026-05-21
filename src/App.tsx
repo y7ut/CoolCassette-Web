@@ -8,6 +8,7 @@ import ToastContainer from './components/ToastContainer'
 import SettingsModal from './components/SettingsModal'
 import ListPage from './pages/ListPage'
 import DetailPage from './pages/DetailPage'
+import { useBuildStore } from './stores/buildStore'
 
 const isDesktop = import.meta.env.VITE_TRANSPORT === 'wails'
 
@@ -19,6 +20,12 @@ function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const queryClient = useQueryClient()
   const location = useLocation()
+  const registerQueryClient = useBuildStore((s) => s.registerQueryClient)
+
+  // Register queryClient once so buildStore can invalidate queries on job completion
+  useEffect(() => {
+    registerQueryClient(queryClient)
+  }, [queryClient, registerQueryClient])
 
   return (
     <>

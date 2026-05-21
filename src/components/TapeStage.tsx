@@ -10,9 +10,10 @@ interface TapeStageProps {
   onPreview?: () => void
   onPublish?: () => void
   isGenerating?: boolean
+  imageBust?: number
 }
 
-export default function TapeStage({ album, onPreview, onPublish, isGenerating }: TapeStageProps) {
+export default function TapeStage({ album, onPreview, onPublish, isGenerating, imageBust }: TapeStageProps) {
   const [, setFrameIdx] = useState(0)
   const [reelDelay, setReelDelay] = useState(FRAME_DELAY)
   const audioPlaying = usePlayerStore((s) => s.isPlaying)
@@ -35,18 +36,20 @@ export default function TapeStage({ album, onPreview, onPublish, isGenerating }:
 
   const reelConfig = { delayMS: reelDelay }
 
+  const bust = imageBust ? `?t=${imageBust}` : ''
+
   let tapeUrl: string | null = null
   if (status === 'built' && album.published_tape_png_url) {
-    tapeUrl = album.published_tape_png_url
+    tapeUrl = album.published_tape_png_url + bust
   } else if (status === 'preview_ready') {
-    tapeUrl = `/api/albums/${album.id}/assets/tape.png`
+    tapeUrl = `/api/albums/${album.id}/assets/tape.png${bust}`
   } else if (status === 'built') {
-    tapeUrl = `/api/albums/${album.id}/assets/tape.png`
+    tapeUrl = `/api/albums/${album.id}/assets/tape.png${bust}`
   }
 
   const reelUrl = (status === 'built' && album.published_reel_png_url)
-    ? album.published_reel_png_url
-    : `/api/albums/${album.id}/assets/reel.png`
+    ? album.published_reel_png_url + bust
+    : `/api/albums/${album.id}/assets/reel.png${bust}`
 
   return (
     <div className="w-full flex flex-col items-center gap-6">

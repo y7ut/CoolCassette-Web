@@ -280,6 +280,15 @@ body::before {
   animation: pulse-accent 2s ease-in-out infinite;
 }
 
+/* Spin animation (for Loader2 icons) */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
 /* Skeleton loading */
 .skeleton {
   background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);

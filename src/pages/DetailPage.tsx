@@ -1,11 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-import { useQueryClient, type InfiniteData } from '@tanstack/react-query'
+import { useEffect, useRef, useState } from 'react'
 import { useAlbumDetail } from '../hooks/useAlbumDetail'
-import { postPreview, postPublish, clearIndexVersion } from '../api/client'
-import type { AlbumListResponse, AlbumItem } from '../api/types'
 import { usePlayerStore } from '../stores/playerStore'
 import { toast } from '../stores/toastStore'
+import { useBuildStore, useAlbumJob, useAlbumPending } from '../stores/buildStore'
 import TapeStage from '../components/TapeStage'
 import Playlist from '../components/Playlist'
 import PlayerControls from '../components/PlayerControls'
@@ -14,59 +12,47 @@ import AudioEngine from '../components/AudioEngine'
 export default function DetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const { data: album, isLoading, refetch } = useAlbumDetail(id || '')
-  const [isGenerating, setIsGenerating] = useState(false)
   const reset = usePlayerStore((s) => s.reset)
+
+  const enqueue = useBuildStore((s) => s.enqueue)
+  const pending = useAlbumPending(id || '')
+  const job = useAlbumJob(id || '')
+
+  // Bumped on every job completion to bust the browser image cache
+  const [imageBust, setImageBust] = useState(() => Date.now())
+  const prevJobStatus = useRef<string | undefined>(undefined)
 
   useEffect(() => {
     return () => reset()
   }, [reset])
 
-  const syncAlbumStatusToList = (albumId: string, newStatus: AlbumItem['status']) => {
-    clearIndexVersion()
-    queryClient.setQueriesData<InfiniteData<AlbumListResponse>>(
-      { queryKey: ['albums'] },
-      (old) => {
-        if (!old) return old
-        return {
-          ...old,
-          pages: old.pages.map((page) => ({
-            ...page,
-            items: page.items.map((item) =>
-              item.id === albumId ? { ...item, status: newStatus } : item
-            ),
-          })),
-        }
-      },
-    )
-  }
+  // When this album's job reaches a terminal state, refetch detail and bust image cache.
+  useEffect(() => {
+    if (!job) return
+    if (job.status === prevJobStatus.current) return
+    prevJobStatus.current = job.status
+    if (job.status === 'succeeded' || job.status === 'failed') {
+      setImageBust(Date.now())
+      refetch()
+    }
+  }, [job?.status]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePreview = async () => {
     if (!id) return
-    setIsGenerating(true)
     try {
-      const result = await postPreview(id, true)
-      syncAlbumStatusToList(id, result.status)
-      await refetch()
+      await enqueue(id, 'preview', true)
     } catch (e) {
       toast('Preview failed: ' + (e as Error).message, { type: 'error', position: 'center', borderSide: 'top' })
-    } finally {
-      setIsGenerating(false)
     }
   }
 
   const handlePublish = async () => {
     if (!id) return
-    setIsGenerating(true)
     try {
-      const result = await postPublish(id, false)
-      syncAlbumStatusToList(id, result.status)
-      await refetch()
+      await enqueue(id, 'publish', false)
     } catch (e) {
       toast('Publish failed: ' + (e as Error).message, { type: 'error', position: 'center', borderSide: 'top' })
-    } finally {
-      setIsGenerating(false)
     }
   }
 
@@ -90,7 +76,6 @@ export default function DetailPage() {
     <div className="min-h-screen px-4 py-8 max-w-[900px] mx-auto fade-in">
       <AudioEngine tracks={album.music_files} albumId={album.id} />
 
-      {/* Header: cover + title + back */}
       <div className="flex items-center gap-4 mb-8">
         {album.has_cover && (
           <img
@@ -109,17 +94,16 @@ export default function DetailPage() {
         </button>
       </div>
 
-      {/* Tape Stage */}
       <div className="mb-10">
         <TapeStage
           album={album}
           onPreview={handlePreview}
           onPublish={handlePublish}
-          isGenerating={isGenerating}
+          isGenerating={pending}
+          imageBust={imageBust}
         />
       </div>
 
-      {/* Player controls + Playlist */}
       {album.music_files && album.music_files.length > 0 && (
         <div>
           <PlayerControls tracks={album.music_files} albumId={album.id} />

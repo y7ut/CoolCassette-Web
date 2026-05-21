@@ -130,6 +130,49 @@ export const httpClient: CoolCassetteAPI = {
     })
   },
 
+  postPreviewAsync(id: string, force = false) {
+    return apiFetch(`/api/albums/${id}/preview/async`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ force }),
+    })
+  },
+
+  postPublishAsync(id: string, force = false) {
+    return apiFetch(`/api/albums/${id}/publish/async`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ force }),
+    })
+  },
+
+  postPreviewBatchAsync(ids: string[], force = false) {
+    return apiFetch('/api/build/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ album_ids: ids, force }),
+    })
+  },
+
+  postPublishBatchAsync(ids: string[], force = false) {
+    return apiFetch('/api/build/publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ album_ids: ids, force }),
+    })
+  },
+
+  getBuildJob(jobID: string) {
+    return apiFetch(`/api/build/jobs/${jobID}`)
+  },
+
+  getBuildQueue(status = 'all') {
+    const sp = new URLSearchParams()
+    if (status && status !== 'all') sp.set('status', status)
+    const qs = sp.toString()
+    return apiFetch(`/api/build/queue${qs ? `?${qs}` : ''}`)
+  },
+
   setIndexVersion,
   getIndexVersion,
   clearIndexVersion,

@@ -22,13 +22,7 @@ export default function AlbumList() {
     isLoading,
     isFetching,
     error,
-    refetch,
   } = useAlbums(sortBy, order, search)
-
-  const is409 = error && (error as any).code === 409
-  useEffect(() => {
-    if (is409) refetch()
-  }, [is409, refetch])
 
   const observerRef = useRef<IntersectionObserver | null>(null)
   const loadMoreRef = useRef<HTMLDivElement>(null)
@@ -68,7 +62,7 @@ export default function AlbumList() {
   const albums = data?.pages.flatMap((p) => p.items) || []
   const showLoading = isLoading || (isFetching && !isFetchingNextPage && albums.length === 0)
 
-  if (error && !is409) {
+  if (error) {
     return (
       <div className="text-center py-20 fade-in">
         <h1 className="font-display text-4xl text-accent tracking-wider mb-2">COOLCASSETTE</h1>

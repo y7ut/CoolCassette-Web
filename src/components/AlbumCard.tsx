@@ -1,17 +1,12 @@
 import { Link } from 'react-router-dom'
-import { Check, Eye, Hammer } from 'lucide-react'
-import { useRef, useEffect } from 'react'
+import { Check, CassetteTape, Loader2 } from 'lucide-react'
+import { useRef, useEffect, useCallback } from 'react'
 import type { AlbumItem } from '../api/client'
 import { saveListState } from './ScrollRestoration'
+import { useBuildStore, useAlbumPending, useAlbumJob } from '../stores/buildStore'
 
 interface AlbumCardProps {
   album: AlbumItem
-}
-
-const STATUS_ICON = {
-  built: { Icon: Check, className: 'text-accent' },
-  preview_ready: { Icon: Eye, className: 'text-orange-400' },
-  not_built: { Icon: Hammer, className: 'text-dim' },
 }
 
 function MarqueeText({ children, className }: { children: string; className: string }) {
@@ -40,7 +35,64 @@ function MarqueeText({ children, className }: { children: string; className: str
 }
 
 export default function AlbumCard({ album }: AlbumCardProps) {
-  const { Icon, className } = STATUS_ICON[album.status]
+  const enqueue = useBuildStore((s) => s.enqueue)
+  const pending = useAlbumPending(album.id)
+  const job = useAlbumJob(album.id)
+
+  const handleIconClick = useCallback(
+    async (e: React.MouseEvent) => {
+      // Only intercept clicks on the icon for not_built albums
+      if (album.status !== 'not_built' || pending) return
+      e.preventDefault() // prevent navigating to detail
+      e.stopPropagation()
+      try {
+        await enqueue(album.id, 'preview', false)
+      } catch {
+        // errors handled by buildStore / toast
+      }
+    },
+    [album.status, album.id, pending, enqueue],
+  )
+
+  // Determine icon state
+  let icon: React.ReactNode
+  if (pending) {
+    icon = (
+      <span
+        className="text-accent shrink-0"
+        title={job?.type === 'publish' ? 'Publishing…' : 'Generating preview…'}
+      >
+        <Loader2 size={16} className="animate-spin" strokeWidth={2} />
+      </span>
+    )
+  } else if (album.status === 'built') {
+    icon = (
+      <span title="Published to Wampy" className="shrink-0 inline-flex">
+        <Check
+          size={16}
+          className="text-accent"
+          strokeWidth={2}
+        />
+      </span>
+    )
+  } else if (album.status === 'preview_ready') {
+    icon = (
+      <span title="Preview ready — not yet published" className="shrink-0 inline-flex">
+        <CassetteTape size={16} className="text-accent" strokeWidth={2} />
+      </span>
+    )
+  } else {
+    // not_built — clickable to trigger async preview
+    icon = (
+      <button
+        onClick={handleIconClick}
+        className="shrink-0 text-dim hover:text-accent transition-colors"
+        title="Click to generate preview"
+      >
+        <CassetteTape size={16} strokeWidth={2} />
+      </button>
+    )
+  }
 
   return (
     <Link
@@ -72,7 +124,7 @@ export default function AlbumCard({ album }: AlbumCardProps) {
             {album.track_count} TRACK{album.track_count !== 1 ? 'S' : ''}
           </p>
         </div>
-        <Icon size={16} className={`shrink-0 ${className}`} strokeWidth={2} />
+        {icon}
       </div>
     </Link>
   )
